@@ -7,12 +7,66 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import Candle from "./Stockchart";
+
+const NIFTY50 = [
+  "ADANIENT",
+  "ADANIPORTS",
+  "APOLLOHOSP",
+  "ASIANPAINT",
+  "AXISBANK",
+  "BAJAJ-AUTO",
+  "BAJFINANCE",
+  "BAJAJFINSV",
+  "BPCL",
+  "BHARTIARTL",
+  "BRITANNIA",
+  "CIPLA",
+  "COALINDIA",
+  "DIVISLAB",
+  "DRREDDY",
+  "EICHERMOT",
+  "GRASIM",
+  "HCLTECH",
+  "HDFCBANK",
+  "HDFCLIFE",
+  "HEROMOTOCO",
+  "HINDALCO",
+  "HINDUNILVR",
+  "ICICIBANK",
+  "ITC",
+  "INDUSINDBK",
+  "INFY",
+  "JSWSTEEL",
+  "KOTAKBANK",
+  "LT",
+  "M&M",
+  "MARUTI",
+  "NTPC",
+  "NESTLEIND",
+  "ONGC",
+  "POWERGRID",
+  "RELIANCE",
+  "SBILIFE",
+  "SBIN",
+  "SUNPHARMA",
+  "TCS",
+  "TATACONSUM",
+  "TATAMOTORS",
+  "TATASTEEL",
+  "TECHM",
+  "TITAN",
+  "ULTRACEMCO",
+  "UPL",
+  "WIPRO",
+];
 
 export default function App() {
   const [query, setQuery] = useState("TATAMOTORS"); // default symbol
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [chartType, setChartType] = useState("candlestick");
 
   useEffect(() => {
     if (!query) return;
@@ -33,27 +87,46 @@ export default function App() {
         setLoading(false);
       }
     }
-    if (query.length < 3) {
-      setError(null);
-      setData([]);
-      return;
-    }
     fetchData();
-  }, [query]); // refetch whenever query changes
+  }, [query]);
+
+  //  {
+  //  !loading && !error && data.length > 0 && (
+  //    <ResponsiveContainer width="100%" height={400}>
+  //      <LineChart data={data}>
+  //        <XAxis dataKey="date" hide /> {/* hide if too many dates */}
+  //        <YAxis />
+  //        <Tooltip />
+  //        <Line type="monotone" dataKey="close" stroke="#6741d9" dot={false} />
+  //      </LineChart>
+  //    </ResponsiveContainer>
+  //  );
+  //  }
 
   return (
     <>
       <NavBar>
-        <Search query={query} setQuery={setQuery} />
-        <NumResults />
+        {/* <Search query={query} setQuery={setQuery} /> */}
+        <NumResults query={query} setQuery={setQuery} />
       </NavBar>
 
       <Main>
-        <Box>
+        <Box
+          style={{
+            padding: "20px",
+            backgroundColor: "#1e1e2f",
+            borderRadius: "12px",
+            minHeight: "600px",
+          }}
+        >
           {loading && <Loader />}
           {error && <Error message={error} />}
-
-          {!loading && !error && data.length > 0 && (
+          {!loading &&
+          !error &&
+          data.length > 0 &&
+          chartType === "candlestick" ? (
+            <Candle query={query} />
+          ) : (
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={data}>
                 <XAxis dataKey="date" hide /> {/* hide if too many dates */}
@@ -68,6 +141,7 @@ export default function App() {
               </LineChart>
             </ResponsiveContainer>
           )}
+        <ToggleType setChartType={setChartType} />
         </Box>
       </Main>
     </>
@@ -117,8 +191,29 @@ function Search({ query, setQuery }) {
   );
 }
 
-function NumResults() {
-  return <p className="num-results">💵💹</p>;
+function NumResults({ query, setQuery }) {
+  return (
+    <select
+      className="select"
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+    >
+      {NIFTY50.map((stock) => (
+        <option value={stock} key={stock}>
+          {stock}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function ToggleType({ setChartType }) {
+  return (
+    <div className="chart-type-toggle">
+      <button onClick={() => setChartType("candlestick")}>Candles</button>
+      <button onClick={() => setChartType("line")}>Line</button>
+    </div>
+  );
 }
 
 function Main({ children }) {
