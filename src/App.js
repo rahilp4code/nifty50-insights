@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import Candle from "./Stockchart";
+// import {
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   Tooltip,
+//   ResponsiveContainer,
+// } from "recharts";
+import Candle from "./simple-chart";
 
 const NIFTY50 = [
   "ADANIENT",
@@ -66,7 +66,8 @@ export default function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [chartType, setChartType] = useState("candlestick");
+  const [refresh,setRefresh]=useState(0)
+  // const [chartType, setChartType] = useState("candlestick");
 
   useEffect(() => {
     if (!query) return;
@@ -88,26 +89,35 @@ export default function App() {
       }
     }
     fetchData();
-  }, [query]);
-
-  //  {
-  //  !loading && !error && data.length > 0 && (
-  //    <ResponsiveContainer width="100%" height={400}>
-  //      <LineChart data={data}>
-  //        <XAxis dataKey="date" hide /> {/* hide if too many dates */}
-  //        <YAxis />
-  //        <Tooltip />
-  //        <Line type="monotone" dataKey="close" stroke="#6741d9" dot={false} />
-  //      </LineChart>
-  //    </ResponsiveContainer>
-  //  );
-  //  }
+  }, [query,refresh]);
 
   return (
     <>
+    <Logo/>
       <NavBar>
         {/* <Search query={query} setQuery={setQuery} /> */}
-        <NumResults query={query} setQuery={setQuery} />
+        <NumResults query={query} setQuery={setQuery} >
+        <div className="flex">
+        <div>
+          <p style={{color:"white",fontSize:'1.5rem',paddingBottom:"5px"}}>Stock:</p>
+    <select
+      className="select"
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+    >
+      {NIFTY50.map((stock) => (
+        <option value={stock} key={stock}>
+          {stock}
+        </option>
+      ))}
+    </select>
+    </div>
+        </div></NumResults>
+    <NumResults>
+     <div style={{display:'flex',alignItem:'center'}}>
+     <button className="search" onClick={()=>setRefresh(r=>r+1)}>Refresh Data</button>
+     </div>
+    </NumResults>
       </NavBar>
 
       <Main>
@@ -124,24 +134,9 @@ export default function App() {
           {!loading &&
           !error &&
           data.length > 0 &&
-          chartType === "candlestick" ? (
             <Candle query={query} />
-          ) : (
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={data}>
-                <XAxis dataKey="date" hide /> {/* hide if too many dates */}
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="close"
-                  stroke="#6741d9"
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        <ToggleType setChartType={setChartType} />
+          }
+        {/* <ToggleType setChartType={setChartType} /> */}
         </Box>
       </Main>
     </>
@@ -162,8 +157,7 @@ function Error({ message }) {
 
 function NavBar({ children }) {
   return (
-    <nav className="nav-bar">
-      <Logo />
+    <nav  className="nav-bar">
       {children}
     </nav>
   );
@@ -172,9 +166,10 @@ function NavBar({ children }) {
 function Logo() {
   return (
     <div className="logo">
-      <span role="img">📈</span>
+    <div className="flex">
       <h1>NSE Stock Dashboard</h1>
-      <span role="img">📉</span>
+      </div>
+      <div style={{fontSize:'17px',color:'white',paddingBottom:"5px"}}><p>Professional Trading Analysis</p></div>
     </div>
   );
 }
@@ -191,20 +186,10 @@ function Search({ query, setQuery }) {
   );
 }
 
-function NumResults({ query, setQuery }) {
-  return (
-    <select
-      className="select"
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-    >
-      {NIFTY50.map((stock) => (
-        <option value={stock} key={stock}>
-          {stock}
-        </option>
-      ))}
-    </select>
-  );
+function NumResults({children}){
+  return( <div>
+      {children}
+  </div> )
 }
 
 function ToggleType({ setChartType }) {
@@ -222,7 +207,7 @@ function Main({ children }) {
 
 function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
-
+  
   return (
     <div className="box">
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
@@ -233,3 +218,31 @@ function Box({ children }) {
     </div>
   );
 }
+
+// function NumResults({ query, setQuery }) {
+//   return (
+//     <div style={{display:'flex',gap:'10px'}}>
+//     <div>
+//     <p style={{color:"white",fontSize:'1.5rem',paddingBottom:"5px"}}>Stock:</p>
+//     <select
+//       className="select"
+//       value={query}
+//       onChange={(e) => setQuery(e.target.value)}
+//     >
+//       {NIFTY50.map((stock) => (
+//         <option value={stock} key={stock}>
+//           {stock}
+//         </option>
+//       ))}
+//     </select>
+//     </div>
+//     <div>
+//     <p style={{color:"white",fontSize:'1.5rem',paddingBottom:"5px"}}>Strike Price</p>
+//     <input type="text" className="search"/>
+//     </div>
+//     <div style={{display:'flex',alignItem:'center'}}>
+//     <button className="search">Refresh Data</button>
+//     </div>
+//     </div> 
+//   );
+// }
